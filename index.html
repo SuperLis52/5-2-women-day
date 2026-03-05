@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Игра к 8 марта</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+color:white;
+text-align:center;
+margin:0;
+zoom:1.2;
+}
+
+h1{font-size:70px}
+h2{font-size:50px}
+
+button{
+font-size:40px;
+padding:25px 50px;
+margin:20px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+}
+
+input{
+font-size:30px;
+padding:10px;
+margin:10px;
+}
+
+#image{
+max-width:90%;
+max-height:600px;
+margin-top:30px;
+border-radius:20px;
+}
+
+#scoreboard{
+display:flex;
+justify-content:space-around;
+font-size:55px;
+margin-top:20px;
+}
+
+.team{
+padding:20px 40px;
+border-radius:15px;
+background:#222;
+}
+
+.active{
+box-shadow:0 0 40px yellow;
+}
+
+#answer{
+font-size:65px;
+margin-top:30px;
+color:yellow;
+}
+
+.correct{background:green}
+.close{background:orange}
+.wrong{background:red}
+
+#flowers{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+overflow:hidden;
+}
+
+.flower{
+position:absolute;
+font-size:35px;
+animation:fall linear infinite;
+}
+
+@keyframes fall{
+0%{transform:translateY(-100px)}
+100%{transform:translateY(110vh)}
+}
+
+.locked{
+background:red;
+transform:scale(0.7);
+opacity:0.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="flowers"></div>
+
+<!-- Главный экран -->
+
+<div id="start">
+
+<h1>🌸 С 8 Марта! 🌸</h1>
+
+<h2>
+Дорогие девочки 5-2 класса МАОУ СМТЛ!  
+<br><br>
+Поздравляем вас с прекрасным весенним праздником —  
+Международным женским днём!  
+<br><br>
+Пусть у вас всегда будет отличное настроение,  
+много улыбок, интересных идей и верных друзей.  
+<br><br>
+Желаем вам радости, успехов в учёбе,  
+новых побед и ярких впечатлений!  
+<br><br>
+А сейчас вас ждёт небольшая игра.  
+Проверим вашу смекалку, внимательность  
+и командный дух!
+</h2>
+
+<button onclick="startSetup()">💐 Принять поздравление</button>
+
+</div>
+
+<!-- Названия команд -->
+
+<div id="setup" style="display:none">
+
+<h2>Придумайте названия команд</h2>
+
+<input id="team1name" placeholder="Команда 1">
+<input id="team2name" placeholder="Команда 2">
+
+<br>
+
+<button onclick="startGame()">Начать игру</button>
+
+</div>
+
+<!-- Игра -->
+
+<div id="game" style="display:none">
+
+<div id="scoreboard">
+
+<div id="team1" class="team"></div>
+<div id="team2" class="team"></div>
+
+</div>
+
+<h2 id="roundTitle"></h2>
+
+<img id="image">
+
+<div id="answer"></div>
+
+<div>
+
+<button id="buzz1" onclick="buzz(1)">✋ Команда 1</button>
+<button id="buzz2" onclick="buzz(2)">✋ Команда 2</button>
+
+</div>
+
+<div>
+
+<button class="correct" onclick="correct()">✔ Правильно ⁶🤷‍♂️⁷</button>
+<button class="close" onclick="closeAnswer()">➖ Близко ⁶🤷‍♂️⁷</button>
+<button class="wrong" onclick="wrong()">❌ Неверно ⁶🤷‍♂️⁷</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* Цветочки */
+
+for(let i=0;i<40;i++){
+
+let f=document.createElement("div")
+f.className="flower"
+f.innerText="🌸"
+f.style.left=Math.random()*100+"%"
+f.style.animationDuration=5+Math.random()*5+"s"
+
+document.getElementById("flowers").appendChild(f)
+
+}
+
+/* Звуки */
+
+let buzzSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
+let correctSound=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg")
+let closeSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg")
+let wrongSound=new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg")
+
+/* Команды */
+
+let team1=""
+let team2=""
+
+let score1=0
+let score2=0
+
+let buzzedTeam=null
+
+/* Вопросы */
+
+let questions=[
+
+{img:"https://yandex.ru/images/search?p=1&text=логотипы+машин+пнг&pos=1&rpt=simage&img_url=https%3A%2F%2Favtoliga.by%2Fimg%2Fmarks_logos%2Fpeugeot_logo.webp&from=tabbar&lr=51",answer:"Pegueot",round:2},
+{img:"https://yandex.ru/images/search?pos=29&from=tabbar&img_url=https%3A%2F%2Fcar-logos.b-cdn.net%2Fwp-content%2Fuploads%2F2023%2F03%2Fchevrolet-logo-2002-2010-scaled.webp&text=логотипы+машин+пнг&rpt=simage&lr=51ссылка_bmw",answer:"Chevrolet",round:2},
+{img:"https://yandex.ru/images/search?pos=3&from=tabbar&img_url=https%3A%2F%2Fclipground.com%2Fimages%2Flogo-infiniti-png-1.png&text=логотипы+машин+пнг&rpt=simage&lr=51",answer:"Infiniti",round:2},
+{img:"https://yandex.ru/images/search?pos=10&from=tabbar&img_url=https%3A%2F%2Fcs13.pikabu.ru%2Fpost_img%2F2023%2F11%2F09%2F9%2Fog_og_1699541577235352390.jpg&text=логотипы+машин+пнг&rpt=simage&lr=51",answer:"Toyota",round:2},
+{img:"https://yandex.ru/images/search?pos=14&from=tabbar&img_url=https%3A%2F%2Fi20.haber7.net%2Fresize%2F1280x720%2Fhaber%2Fhaber7%2Fphotos%2Fromanya_volkswagen_satislarini_durdurdu_1443768886_7547.jpg&text=логотипы+машин+пнг&rpt=simage&lr=51agen",answer:"Volkswagen",round:2}
+
+]
+
+questions.sort(()=>Math.random()-0.5)
+
+let current=0
+
+function startSetup(){
+
+document.getElementById("start").style.display="none"
+document.getElementById("setup").style.display="block"
+
+}
+
+function startGame(){
+
+document.getElementById("buzz1").innerText="☝Команда ✋" + team1
+document.getElementById("buzz2").innerText="✋Команда ☝ "+team2
+ 
+team1=document.getElementById("team1name").value
+team2=document.getElementById("team2name").value
+
+document.getElementById("setup").style.display="none"
+document.getElementById("game").style.display="block"
+
+updateScore()
+
+showQuestion()
+
+}
+
+function updateScore(){
+
+document.getElementById("team1").innerText=team1+" : "+score1
+document.getElementById("team2").innerText=team2+" : "+score2
+
+}
+
+function showQuestion(){
+
+buzzedTeam=null
+
+document.getElementById("answer").innerText=""
+
+let q=questions[current]
+
+document.getElementById("image").src=q.img
+
+document.getElementById("roundTitle").innerText=
+q.round==1?"Вопрос из категории ПРЕДМЕТЫ":"Вопрос из категории ЛОГОТИПЫ МАРОК АВТОМОБИЛЕЙ"
+
+}
+
+function buzz(team){
+
+if(buzzedTeam)return
+
+buzzedTeam=team
+
+buzzSound.play()
+
+document.getElementById("team"+team).classList.add("active")
+
+if(team==1){
+document.getElementById("buzz2").classList.add("locked")
+}
+
+if(team==2){
+document.getElementById("buzz1").classList.add("locked")
+}
+
+}
+
+function addScore(points){
+
+if(buzzedTeam==1)score1+=points
+if(buzzedTeam==2)score2+=points
+
+updateScore()
+
+showAnswer()
+
+}
+
+function showAnswer(){
+
+let q=questions[current]
+
+document.getElementById("answer").innerText=q.answer
+
+setTimeout(nextQuestion,5000)
+
+}
+
+function correct(){
+
+if(!buzzedTeam)return
+
+correctSound.play()
+
+addScore(2)
+
+}
+
+function closeAnswer(){
+
+if(!buzzedTeam)return
+
+closeSound.play()
+
+addScore(1)
+
+}
+
+function wrong(){
+
+if(!buzzedTeam)return
+
+wrongSound.play()
+
+addScore(-1)
+
+}
+
+function nextQuestion(){
+
+document.getElementById("buzz1").classList.remove("locked")
+document.getElementById("buzz2").classList.remove("locked")
+
+document.getElementById("team1").classList.remove("active")
+document.getElementById("team2").classList.remove("active")
+
+current++
+
+if(current>=questions.length){
+
+alert("Игра окончена!")
+
+return
+
+}
+
+showQuestion()
+
+}
+
+</script>
+
+</body>
+</html>
