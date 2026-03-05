@@ -126,6 +126,23 @@ opacity:0.7;
 
 <button onclick="startSetup()">💐 Принять поздравление</button>
 
+  <!-- Блок с правилами игры -->
+<div id="rules" style="display:none">
+   <h2>Правила нашей веселой викторины:</h2>
+   
+   <ul>
+      <li>Вы будете играть двумя командами.</li>
+      <li>Вам предстоит угадать предметы и логотипы автомобилей.</li>
+      <li>Если кто-то знает ответ, то он должен поднять руку, и, когда ведущий нажмет кнопку, ОТВЕТИТЬ ЗА ВСЮ КОМАНДУ</li>
+     <li>Если команда ответила неправильно, показывается правильный ответ </li>
+      <li>За верный ответ команда получает 2 балла, за близкий ответ — 1 балл, за неверный — минус 1 балл.</li>
+      <li>Победит та команда, которая наберет больше всего баллов!</li>
+     <li>Команда победителей получит призы</li>
+   </ul>
+   
+   <button onclick="showTeamsSetup()">👩‍🎨 Продолжить → Придумываем название команд</button>
+</div>
+
 </div>
 
 <!-- Названия команд -->
@@ -178,197 +195,178 @@ opacity:0.7;
 </div>
 
 <script>
-
+  
 /* Цветочки */
-
-for(let i=0;i<40;i++){
-
-let f=document.createElement("div")
-f.className="flower"
-f.innerText="🌸"
-f.style.left=Math.random()*100+"%"
-f.style.animationDuration=5+Math.random()*5+"s"
-
-document.getElementById("flowers").appendChild(f)
-
+for (let i = 0; i < 40; i++) {
+    const flower = document.createElement("div");
+    flower.className = "flower";
+    flower.textContent = "🌸";
+    flower.style.left = `${Math.random() * 100}%`;
+    flower.style.animationDuration = `${5 + Math.random() * 5}s`;
+    
+    document.getElementById("flowers").appendChild(flower);
 }
 
 /* Звуки */
-
-let buzzSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
-let correctSound=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg")
-let closeSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg")
-let wrongSound=new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg")
+const buzzSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const closeSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
 
 /* Команды */
-
-let team1=""
-let team2=""
-
-let score1=0
-let score2=0
-
-let buzzedTeam=null
+let team1 = "";
+let team2 = "";
+let score1 = 0;
+let score2 = 0;
+let buzzedTeam = null;
 
 /* Вопросы */
-
-let questions = [
-  { img: "https://upload.wikimedia.org/wikipedia/ru/thumb/6/6c/Bentley_logo.svg/1200px-Bentley_logo.svg.png", answer: "Bentley", round: 2 },
-  { img: "https://csn-tv.ru/storage/uploads/webp/d2f6CNr20NV2zQiOYQCq.webp", answer: "Lixiang", round: 2 }, // Добавлена запятая
-  { img: "https://i.pinimg.com/originals/63/7c/fd/637cfd3724d8e5bc3ec9b2550a723d87.png", answer: "Peugeot", round: 2 },
-  { img: "https://avatars.mds.yandex.net/i?id=f999244fcbf886797036256f08d94333_l-5445950-images-thumbs&n=13", answer: "Chevrolet", round: 2 },
-  { img: "https://kutuzovv.ru/upload/iblock/dcd/dy7l4w1tfgou6bsj7cm5ltfvx2kf576r.png", answer: "Infiniti", round: 2 },
-
-  { img: "https://avatars.mds.yandex.net/i?id=64dd0afb06eefa9f0ee8694e652220d122bf4921-5598196-images-thumbs&n=13", answer: "Мотокоса", round: 1 },
-  { img: "https://spinningline.ru/images/products_photo_providers/00260000/00260571/00260571_7634_LARGE.jpg", answer: "Воблер", round: 1 },
-  { img: "https://avatars.mds.yandex.net/i?id=68687430aeead46a7e0822a85a1552120a52eb03-4542475-images-thumbs&n=13", answer: "Спиннинг/спиннинговое удилище", round: 1 },
-  { img: "https://avatars.mds.yandex.net/i?id=c4023b0d52d7ff045c6ecde0f11e892d_l-3631422-images-thumbs&n=13", answer: "Фронтальный погрузчик", round: 1 },
-  { img: "https://avatars.mds.yandex.net/i?id=22f556b71cc155407da0135975c61923f764cfce-6620537-images-thumbs&n=13", answer: "Круглогубцы", round: 1 }
+const questions = [
+    { img: "https://upload.wikimedia.org/wikipedia/ru/thumb/6/6c/Bentley_logo.svg/1200px-Bentley_logo.svg.png", answer: "Bentley", round: 2 },
+    { img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Li_Auto_logo.png/1280px-Li_Auto_logo.png", answer: "Lixiang", round: 2 },
+    { img: "https://yandex.ru/images/search?p=1&text=логотипы+машин+пнг&pos=1&rpt=simage&img_url=https%3A%2F%2Favtoliga.by%2Fimg%2Fmarks_logos%2Fpeugeot_logo.webp&from=tabbar&lr=51", answer: "Peugeot", round: 2 },
+    { img: "https://avatars.mds.yandex.net/i?id=f999244fcbf886797036256f08d94333_l-5445950-images-thumbs&n=13", answer: "Chevrolet", round: 2 },
+    { img: "https://kutuzovv.ru/upload/iblock/dcd/dy7l4w1tfgou6bsj7cm5ltfvx2kf576r.png", answer: "Infiniti", round: 2 },
+    { img: "https://avatars.mds.yandex.net/i?id=64dd0afb06eefa9f0ee8694e652220d122bf4921-5598196-images-thumbs&n=13", answer: "Мотокоса", round: 1 },
+    { img: "https://spinningline.ru/images/products_photo_providers/00260000/00260571/00260571_7634_LARGE.jpg", answer: "Воблер", round: 1 },
+    { img: "https://avatars.mds.yandex.net/i?id=68687430aeead46a7e0822a85a1552120a52eb03-4542475-images-thumbs&n=13", answer: "Спиннинг/спиннинговое удилище", round: 1 },
+    { img: "https://avatars.mds.yandex.net/i?id=c4023b0d52d7ff045c6ecde0f11e892d_l-3631422-images-thumbs&n=13", answer: "Фронтальный погрузчик", round: 1 },
+    { img: "https://avatars.mds.yandex.net/i?id=22f556b71cc155407da0135975c61923f764cfce-6620537-images-thumbs&n=13", answer: "Круглогубцы", round: 1 }
 ];
 
+questions.sort(() => Math.random() - 0.5); // Перемешиваем порядок вопросов
 
+let current = 0;
 
-questions.sort(()=>Math.random()-0.5)
-
-let current=0
-
-function startSetup(){
-
-document.getElementById("start").style.display="none"
-document.getElementById("setup").style.display="block"
-
+// Новый метод: показать правила игры
+function showRules() {
+    document.getElementById("start").style.display = "none"; // Скрываем стартовую заставку
+    document.getElementById("rules").style.display = "block"; // Показываем правила
 }
 
-function startGame(){
-
-document.getElementById("buzz1").innerText="☝Команда ✋" + team1
-document.getElementById("buzz2").innerText="✋Команда ☝ "+team2
- 
-team1=document.getElementById("team1name").value
-team2=document.getElementById("team2name").value
-
-document.getElementById("setup").style.display="none"
-document.getElementById("game").style.display="block"
-
-updateScore()
-
-showQuestion()
-
+// Новый метод: перейти к вводу названий команд
+function showTeamsSetup() {
+    document.getElementById("rules").style.display = "none"; // Скрываем правила
+    document.getElementById("setup").style.display = "block"; // Показываем форму ввода названий команд
 }
 
-function updateScore(){
-
-document.getElementById("team1").innerText=team1+" : "+score1
-document.getElementById("team2").innerText=team2+" : "+score2
-
+// Обновленная функция начала игры (после поздравления)
+function startSetup() {
+    showRules(); // Теперь сразу переходим к правилам
 }
 
-function showQuestion(){
+// Метод начала основной игры
+function startGame() {
+    team1 = document.getElementById("team1name").value.trim();
+    team2 = document.getElementById("team2name").value.trim();
 
-buzzedTeam=null
+    if (!team1 || !team2) return alert("Нужно ввести оба имени команд!");
 
-document.getElementById("answer").innerText=""
+    document.getElementById("buzz1").innerText = "👩‍🎨 Команда " + team1;
+    document.getElementById("buzz2").innerText = "👩‍🎨 Команда " + team2;
 
-let q=questions[current]
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("game").style.display = "block";
 
-document.getElementById("image").src=q.img
-
-document.getElementById("roundTitle").innerText=
-q.round==1?"Вопрос из категории ПРЕДМЕТЫ":"Вопрос из категории ЛОГОТИПЫ МАРОК АВТОМОБИЛЕЙ"
-
+    updateScore();
+    showQuestion();
 }
 
-function buzz(team){
-
-if(buzzedTeam)return
-
-buzzedTeam=team
-
-buzzSound.play()
-
-document.getElementById("team"+team).classList.add("active")
-
-if(team==1){
-document.getElementById("buzz2").classList.add("locked")
+// Обновление счёта команд
+function updateScore() {
+    document.getElementById("team1").innerText = team1 + ": " + score1;
+    document.getElementById("team2").innerText = team2 + ": " + score2;
 }
 
-if(team==2){
-document.getElementById("buzz1").classList.add("locked")
+// Отображение текущего вопроса
+function showQuestion() {
+    buzzedTeam = null;
+    document.getElementById("answer").innerText = "";
+
+    const question = questions[current];
+
+    document.getElementById("image").src = question.img;
+    document.getElementById("roundTitle").innerText =
+        question.round === 1 ? "Категория: Предметы" : "Категория: Логотипы марок авто";
 }
 
+// Нажатие кнопок командой
+function buzz(team) {
+    if (buzzedTeam !== null) return;
+
+    buzzedTeam = team;
+    buzzSound.play();
+
+    document.getElementById(`team${team}`).classList.add("active");
+
+    if (team === 1) {
+        document.getElementById("buzz2").classList.add("locked");
+    } else {
+        document.getElementById("buzz1").classList.add("locked");
+    }
 }
 
-function addScore(points){
+// Подсчет очков и вывод правильного ответа
+function addScore(points) {
+    if (buzzedTeam === 1) score1 += points;
+    if (buzzedTeam === 2) score2 += points;
 
-if(buzzedTeam==1)score1+=points
-if(buzzedTeam==2)score2+=points
-
-updateScore()
-
-showAnswer()
-
+    updateScore();
+    showAnswer();
 }
 
-function showAnswer(){
+// Показ правильного ответа
+function showAnswer() {
+    const question = questions[current];
+    document.getElementById("answer").innerText = question.answer;
 
-let q=questions[current]
-
-document.getElementById("answer").innerText=q.answer
-
-setTimeout(nextQuestion,5000)
-
+    setTimeout(nextQuestion, 5000);
 }
 
-function correct(){
+// Правильный ответ (+2 очка)
+function correct() {
+    if (!buzzedTeam) return;
 
-if(!buzzedTeam)return
-
-correctSound.play()
-
-addScore(2)
-
+    correctSound.play();
+    addScore(2);
 }
 
-function closeAnswer(){
+// Почти правильный (-близкий-) ответ (+1 очко)
+function closeAnswer() {
+    if (!buzzedTeam) return;
 
-if(!buzzedTeam)return
-
-closeSound.play()
-
-addScore(1)
-
+    closeSound.play();
+    addScore(1);
 }
 
-function wrong(){
+// Неправильный ответ (-1 очко)
+function wrong() {
+    if (!buzzedTeam) return;
 
-if(!buzzedTeam)return
-
-wrongSound.play()
-
-addScore(-1)
-
+    wrongSound.play();
+    addScore(-1);
 }
 
-function nextQuestion(){
+// Следующий вопрос
+function nextQuestion() {
+    document.getElementById("buzz1").classList.remove("locked");
+    document.getElementById("buzz2").classList.remove("locked");
 
-document.getElementById("buzz1").classList.remove("locked")
-document.getElementById("buzz2").classList.remove("locked")
+    document.getElementById("team1").classList.remove("active");
+    document.getElementById("team2").classList.remove("active");
 
-document.getElementById("team1").classList.remove("active")
-document.getElementById("team2").classList.remove("active")
+    current++;
 
-current++
+    if (current >= questions.length) {
+        alert("Игра закончена!\n\nИтоговый счёт:\n" +
+              `${team1}: ${score1}\n` +
+              `${team2}: ${score2}`);
+        
+        location.reload(); // перезагрузка страницы после завершения
+        return;
+    }
 
-if(current>=questions.length){
-
-alert("Игра окончена!")
-
-return
-
-}
-
-showQuestion()
-
+    showQuestion();
 }
 
 </script>
